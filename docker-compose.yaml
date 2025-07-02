@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Spring Boot Application
+  need-calculation-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: need-calculation-service
+    ports:
+      - "8081:8081"
+    environment:
+      # Spring profiles
+      - SPRING_PROFILES_ACTIVE=docker
+      # Database configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/forecast_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres123
+      # CSV file path
+      - CSV_FILE_PATH=/app/resources/forecast_data.csv
+      # JVM options
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - need-calc-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: need-calc-postgres
+    environment:
+      - POSTGRES_DB=forecast_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - need-calc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: need-calc-adminer
+    ports:
+      - "8081:8081"
+    networks:
+      - need-calc-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  need-calc-network:
+    driver: bridge

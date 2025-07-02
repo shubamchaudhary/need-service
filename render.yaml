@@ -1,0 +1,55 @@
+# Render deployment configuration
+services:
+  # Web service for the Spring Boot application
+  - type: web
+    name: need-calculation-service
+    runtime: docker
+    repo: https://github.com/YOUR_USERNAME/need-calculation-service # Replace with your repo
+    region: oregon # or singapore, frankfurt, ohio
+    plan: free # or starter, standard, pro
+
+    # Build configuration
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    # Environment variables
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: SERVER_PORT
+        value: 8081
+      - key: CSV_FILE_PATH
+        value: /app/resources/forecast_data.csv
+      - key: JAVA_OPTS
+        value: -Xmx512m -Xms256m -XX:+UseContainerSupport
+
+      # Database connection (if using Render PostgreSQL)
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: forecast-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: forecast-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: forecast-db
+          property: password
+
+    # Health check configuration
+    healthCheckPath: /api/v1/need-calculation/health
+
+    # Auto-deploy on push to main branch
+    autoDeploy: true
+
+  # Optional: PostgreSQL database on Render
+databases:
+  - name: forecast-db
+    plan: free # or starter, standard, pro
+    region: oregon # should match service region
+    databaseName: forecast_db
+    user: forecast_user
+
+    # Enable connection pooling
+    ipAllowList: [] # Allow connections from Render services only

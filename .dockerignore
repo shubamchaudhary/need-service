@@ -1,0 +1,46 @@
+# Git files
+.git
+.gitignore
+
+# IDE files
+.idea
+*.iml
+*.iws
+*.ipr
+.vscode
+.settings
+.project
+.classpath
+
+# Build files
+build/
+target/
+out/
+.gradle/
+gradle/wrapper/gradle-wrapper.jar
+
+# Test files
+src/test/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Local configuration
+application-local.properties
+application-dev.properties
