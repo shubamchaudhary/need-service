@@ -11,6 +11,9 @@ COPY gradlew .
 COPY build.gradle .
 COPY settings.gradle .
 
+# Make gradlew executable
+RUN chmod +x ./gradlew
+
 # Download dependencies (this layer will be cached if dependencies don't change)
 RUN ./gradlew dependencies --no-daemon
 
@@ -43,11 +46,11 @@ RUN mkdir -p /app/logs && chown -R spring:spring /app
 USER spring:spring
 
 # Expose port
-EXPOSE 8081
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8081/api/v1/need-calculation/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/v1/need-calculation/health || exit 1
 
 # Set JVM options for container environment
 ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
